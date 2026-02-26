@@ -2,11 +2,15 @@
 session_start();
 include('config.php');
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit(); }
+
 $cat_id = isset($_GET['id']) ? mysqli_real_escape_string($conn, $_GET['id']) : "";
 if (empty($cat_id)) { header("Location: categories.php"); exit(); }
+
 $cat_info = mysqli_fetch_assoc(mysqli_query($conn, "SELECT name FROM categories WHERE category_id = '$cat_id'"));
 $category_name = $cat_info['name'] ?? "Unknown Category";
-$result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_id' ORDER BY name ASC");
+
+// UPDATED: Query now includes created_at (assumed column in your products table)
+$result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_id' ORDER BY created_at DESC");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +21,6 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        /* ADDED: Responsive Main Content adapted to Sidebar */
         :root {
             --sidebar-width: 280px;
         }
@@ -26,7 +29,7 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
             transition: margin-left 0.3s; 
             width: 100%;
             overflow-x: hidden;
-            position: relative; /* ADDED: To help contain the watermark */
+            position: relative;
         }
         
         @media (min-width: 992px) { 
@@ -42,7 +45,6 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
             } 
         }
 
-        /* ADDED: Watermark hidden by default on the screen */
         .watermark-logo {
             display: none; 
         }
@@ -51,14 +53,10 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
             body { background-color: white; }
             .d-print-none { display: none !important; }
             #main-content { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
-            
-            /* UPDATED: Added transparent backgrounds so they don't block the watermark */
             .card { border: none !important; box-shadow: none !important; background: transparent !important; }
             table { background: transparent !important; }
-            
             .badge { border: 1px solid #000; color: #000 !important; }
 
-            /* ADDED: Make the watermark visible and positioned during print */
             .watermark-logo {
                 display: block !important;
                 position: fixed;
@@ -71,6 +69,12 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
                 pointer-events: none;
             }
         }
+
+        /* Added style for the timestamp text */
+        .date-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
@@ -82,6 +86,7 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
         <img src="8thmile_logo.png" class="watermark-logo" alt="Watermark Background">
 
         <button class="btn btn-primary d-lg-none mb-3 animate-fade-up d-print-none" onclick="toggleSidebar()"><i class="bi bi-list"></i> Menu</button>
+        
         <div class="d-flex justify-content-between align-items-center mb-4 animate-slide-in">
             <div>
                 <a href="categories.php" class="text-decoration-none text-muted small d-print-none"><i class="bi bi-arrow-left"></i> Back to Categories</a>
@@ -92,6 +97,7 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
                 <button onclick="window.print()" class="btn btn-outline-primary ms-2 d-print-none"><i class="bi bi-printer"></i> Print</button>
             </div>
         </div>
+
         <div class="card border-0 shadow-sm animate-fade-up delay-1">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -99,7 +105,7 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
                         <tr>
                             <th class="ps-4">Code</th>
                             <th>Item Name</th>
-                            <th>Supplier</th>
+                            <th>Date Added</th> <th>Supplier</th>
                             <th>Stock</th>
                             <th>Price</th>
                             <th>Total Value</th>
@@ -111,10 +117,16 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
                         while($row = mysqli_fetch_assoc($result)): 
                             $item_total = $row['quantity'] * $row['unit_price'];
                             $grand_total += $item_total;
+                            
+                            // Format the date
+                            $formatted_date = date('M d, Y | h:i A', strtotime($row['created_at']));
                         ?>
                         <tr>
                             <td class="ps-4 fw-bold text-primary"><?php echo htmlspecialchars($row['sku']); ?></td>
                             <td><?php echo htmlspecialchars($row['name']); ?></td>
+                            <td class="date-text">
+                                <i class="bi bi-calendar3 me-1"></i> <?php echo $formatted_date; ?>
+                            </td>
                             <td><?php echo htmlspecialchars($row['supplier']); ?></td>
                             <td><?php echo $row['quantity']; ?></td>
                             <td class="fw-bold">₱<?php echo number_format($row['unit_price'], 2); ?></td>
@@ -124,8 +136,7 @@ $result = mysqli_query($conn, "SELECT * FROM products WHERE category_id = '$cat_
                     </tbody>
                     <tfoot class="table-light fw-bold">
                         <tr>
-                            <td colspan="5" class="text-end pe-4">Total Inventory Value:</td>
-                            <td class="text-success fs-6">₱<?php echo number_format($grand_total, 2); ?></td>
+                            <td colspan="6" class="text-end pe-4">Total Inventory Value:</td> <td class="text-success fs-6">₱<?php echo number_format($grand_total, 2); ?></td>
                         </tr>
                     </tfoot>
                 </table>
