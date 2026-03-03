@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 22, 2026 at 03:28 AM
+-- Generation Time: Mar 03, 2026 at 02:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,7 +47,6 @@ INSERT INTO `categories` (`category_id`, `name`, `description`, `created_at`, `u
 (5, 'Engineering Tools', 'Precision instruments', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
 (6, 'Fabrication Tools', 'Tools for fabrication', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
 (7, 'Fabrication Materials', 'Materials for fabrication', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
-(8, 'IT Equipment', 'Computers and networking', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
 (9, 'Machine Equipment', 'Heavy and light machinery', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
 (10, 'Machinist Tools', 'Tools for machining', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
 (11, 'Mechanical Tools', 'Wrenches and gear', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
@@ -59,7 +58,8 @@ INSERT INTO `categories` (`category_id`, `name`, `description`, `created_at`, `u
 (17, 'Special Tools', 'Unique specialized equipment', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
 (18, 'Tools Equipment', 'General workshop equipment', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
 (19, 'Trucking', 'Vehicle related items', '2026-02-14 09:53:27', '2026-02-14 09:53:27'),
-(20, 'PPE', '', '2026-02-14 10:12:33', '2026-02-14 10:12:33');
+(20, 'PPE', '', '2026-02-14 10:12:33', '2026-02-14 10:12:33'),
+(469, 'IT Equipment', '', '2026-02-23 05:53:21', '2026-02-23 05:53:21');
 
 -- --------------------------------------------------------
 
@@ -91,9 +91,32 @@ INSERT INTO `clients` (`id`, `client_name`, `contact_person`, `email`, `phone`, 
 (9, 'Brixton (MNC)', '', '', '', '', '2026-02-19 02:27:58'),
 (10, 'M.I.S (MNC)', '', '', '', '', '2026-02-19 02:28:14'),
 (11, 'Porac (MNC)', '', '', '', '', '2026-02-19 02:28:35'),
+(12, 'Wafer Plant (MNC)', '', '', '', '', '2026-02-19 02:28:53'),
 (13, 'Seasoning Plant (MNC)', '', '', '', '', '2026-02-19 02:29:09'),
 (14, 'Engineering (MNC)', '', '', '', '', '2026-02-19 02:29:28'),
 (15, 'IT DEPT', 'Mr. Ruel Nunez', '', '', '', '2026-02-19 02:29:55');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employees`
+--
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `designation` varchar(100) DEFAULT NULL,
+  `contact_no` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `employees`
+--
+
+INSERT INTO `employees` (`id`, `first_name`, `last_name`, `designation`, `contact_no`, `email`) VALUES
+(4, 'Samuel', 'Base', 'Supervisor', '123456', 'sam@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -118,11 +141,12 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`productID`, `name`, `sku`, `category_id`, `quantity`, `unit_price`, `created_at`, `updated_at`, `supplier`) VALUES
-(1, 'Reflector Vest', '8M-2026-001', 15, 8, 200.00, '2026-02-18 05:39:37', '2026-02-18 05:39:37', 'Mr. Diy'),
-(2, 'Power Drill', '8M-2026-002', 13, 3, 5000.00, '2026-02-18 05:40:12', '2026-02-18 05:40:12', 'SM'),
-(3, 'Wrench ', '8M-2026-003', 18, 99, 100.00, '2026-02-18 05:41:07', '2026-02-18 05:41:07', 'SM'),
-(5, 'Hard Hat', '8M-2026-004', 15, 99, 200.00, '2026-02-19 05:19:24', '2026-02-19 05:19:24', 'Mr.Diy'),
-(6, 'Sapatos', '8M-2026-005', 20, 110, 250.00, '2026-02-22 02:08:59', '2026-02-22 02:26:05', 'Sandugo');
+(8, 'H-Frame', '8M-2026-007', 16, 99, 2500.00, '2026-02-23 04:38:06', '2026-02-23 04:38:06', '8th Mile'),
+(9, 'X-Frame', '8M-2026-008', 16, 100, 1800.00, '2026-02-23 04:38:37', '2026-02-23 04:38:37', '8th Mile'),
+(10, 'Flat Form(Scaffold)', '8M-2026-009', 16, 80, 1200.00, '2026-02-23 04:39:31', '2026-02-23 04:39:31', '8th Mile'),
+(11, 'Join Pin ', '8M-2026-010', 16, 300, 200.00, '2026-02-23 04:40:05', '2026-02-23 04:48:13', '8th Mile'),
+(12, 'Swivel Clamp 1-1/2″ (Scaffolding) ', '8M-2026-011', 16, 500, 300.00, '2026-02-23 04:46:00', '2026-02-23 04:46:00', '8th Mile'),
+(13, 'Scaffolding Caster Wheel  6\" Heavy Duty ', '8M-2026-012', 16, 24, 1400.00, '2026-02-23 04:47:39', '2026-02-23 04:47:58', '8th Mile');
 
 -- --------------------------------------------------------
 
@@ -141,20 +165,6 @@ CREATE TABLE `returns` (
   `item_condition` varchar(50) DEFAULT 'Good',
   `status` varchar(20) DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `returns`
---
-
-INSERT INTO `returns` (`id`, `return_id`, `product_id`, `item_holder`, `stockman_name`, `quantity`, `return_date`, `item_condition`, `status`) VALUES
-(8, 'RET-CB3BD', 1, 'Luwizz', '', 2, '2026-02-18 05:41:39', 'Good', 'active'),
-(10, 'RET-2DC79', 3, 'Cawan Nina', '', 1, '2026-02-19 00:56:45', 'Good', 'active'),
-(11, 'RET-4451D', 2, 'Luwizz', '', 2, '2026-02-19 00:57:02', 'Good', 'active'),
-(12, 'RET-BE9A9', 3, 'Luwizz', '', 3, '2026-02-19 00:57:16', 'Good', 'active'),
-(13, 'RET-A9631', 1, 'Luwizz', '', 1, '2026-02-19 00:57:22', 'Good', 'active'),
-(14, 'RET-4719A', 1, 'Cawan Nina', '', 5, '2026-02-19 01:09:47', 'Fair', 'active'),
-(15, 'RET-82107', 2, 'Cawan Nina', '', 1, '2026-02-19 06:13:56', 'Damaged', 'active'),
-(16, 'RET-4E631', 5, 'Cawan Nina', '', 1, '2026-02-19 06:43:04', 'Good', 'active');
 
 -- --------------------------------------------------------
 
@@ -202,7 +212,9 @@ CREATE TABLE `stock_out` (
   `product_id` int(11) NOT NULL,
   `holder_name` varchar(100) NOT NULL,
   `holder_id_number` varchar(50) NOT NULL,
+  `project_name` varchar(255) DEFAULT NULL,
   `quantity` int(11) NOT NULL,
+  `unit` varchar(50) DEFAULT NULL,
   `date_out` datetime DEFAULT current_timestamp(),
   `ClientID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -211,13 +223,8 @@ CREATE TABLE `stock_out` (
 -- Dumping data for table `stock_out`
 --
 
-INSERT INTO `stock_out` (`id`, `transaction_id`, `product_id`, `holder_name`, `holder_id_number`, `quantity`, `date_out`, `ClientID`) VALUES
-(42, 'OUT-D250E', 2, 'Cawan Nina', '1', 1, '2026-02-19 03:26:10', 2),
-(44, 'OUT-24326', 5, 'Cawan Nina', '1', 1, '2026-02-19 07:08:57', 3),
-(45, 'OUT-24326', 1, 'Cawan Nina', '1', 1, '2026-02-19 07:08:57', 3),
-(46, 'OUT-24326', 3, 'Cawan Nina', '1', 1, '2026-02-19 07:08:57', 3),
-(47, 'OUT-24326', 2, 'Cawan Nina', '1', 1, '2026-02-19 07:08:57', 3),
-(48, 'OUT-24326', 1, 'Cawan Nina', '1', 1, '2026-02-19 07:08:57', 3);
+INSERT INTO `stock_out` (`id`, `transaction_id`, `product_id`, `holder_name`, `holder_id_number`, `project_name`, `quantity`, `unit`, `date_out`, `ClientID`) VALUES
+(95, 'OUT-8A5B3', 8, 'Samuel Base', '', 'Renovation', 1, 'Set', '2026-03-03 01:24:17', 3);
 
 -- --------------------------------------------------------
 
@@ -227,9 +234,9 @@ INSERT INTO `stock_out` (`id`, `transaction_id`, `product_id`, `holder_name`, `h
 
 CREATE TABLE `suppliers` (
   `supplier_id` int(11) NOT NULL,
-  `supplier_name` varchar(150) NOT NULL,
-  `contact_person` varchar(100) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL
+  `name` varchar(255) NOT NULL,
+  `contact` varchar(50) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -273,6 +280,12 @@ ALTER TABLE `clients`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `employees`
+--
+ALTER TABLE `employees`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `products`
 --
 ALTER TABLE `products`
@@ -313,7 +326,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=469;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=470;
 
 --
 -- AUTO_INCREMENT for table `clients`
@@ -322,22 +335,28 @@ ALTER TABLE `clients`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
+-- AUTO_INCREMENT for table `employees`
+--
+ALTER TABLE `employees`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `productID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `productID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `returns`
 --
 ALTER TABLE `returns`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `stock_out`
 --
 ALTER TABLE `stock_out`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
