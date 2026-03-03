@@ -12,10 +12,10 @@ $lowStock = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as t FROM pr
 $issuedOut = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as t FROM stock_out"))['t'];
 $returns = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as t FROM returns"))['t'];
 
-// NEW: Total Value Query
+// Total Value Query
 $totalValue = mysqli_fetch_assoc(mysqli_query($conn, "SELECT SUM(quantity * unit_price) as t FROM products"))['t'] ?? 0;
 
-// NEW: Category Total Value Query
+// Category Total Value Query
 $catTotalsQuery = "SELECT c.name, SUM(p.quantity * p.unit_price) as cat_total 
                    FROM categories c 
                    LEFT JOIN products p ON c.category_id = p.category_id 
@@ -35,7 +35,6 @@ $catTotalsResult = mysqli_query($conn, $catTotalsQuery);
         :root { --8th-blue: #002d72; }
         body { background-color: #f8f9fa; }
         
-        /* Layout Fix for Sidebar */
         #main-content { 
             transition: margin-left 0.3s; 
             width: 100%;
@@ -44,7 +43,6 @@ $catTotalsResult = mysqli_query($conn, $catTotalsQuery);
         @media (min-width: 992px) { #main-content { margin-left: 280px; width: calc(100% - 280px); } }
         @media (max-width: 991.98px) { #main-content { margin-left: 0; } }
 
-        /* --- NEW ANIMATIONS --- */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -56,7 +54,6 @@ $catTotalsResult = mysqli_query($conn, $catTotalsQuery);
         .delay-3 { animation-delay: 0.3s; }
         .delay-4 { animation-delay: 0.4s; }
 
-        /* --- STYLING IMPROVEMENTS --- */
         .stat-card {
             border: 1px solid rgba(0,0,0,0.05);
             border-radius: 16px;
@@ -83,7 +80,6 @@ $catTotalsResult = mysqli_query($conn, $catTotalsQuery);
         }
         .hover-bg-light:hover { background-color: #f8f9fa; cursor: pointer; }
         
-        /* Custom Scrollbar for Category List */
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
@@ -105,30 +101,34 @@ $catTotalsResult = mysqli_query($conn, $catTotalsQuery);
             
             <div class="row g-3 mb-5">
                 <div class="col-md-4 col-lg animate-fade-up delay-1">
-                    <div class="card stat-card shadow-sm p-3 h-100">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small fw-bold text-uppercase mb-1">Total Value</p>
-                                <h3 class="fw-bold mb-0 text-success">₱<?php echo number_format($totalValue, 2); ?></h3>
-                            </div>
-                            <div class="icon-box bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-cash-stack fs-3"></i>
+                    <a href="inventory.php" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted small fw-bold text-uppercase mb-1 text-dark">Total Value</p>
+                                    <h3 class="fw-bold mb-0 text-success">₱<?php echo number_format($totalValue, 2); ?></h3>
+                                </div>
+                                <div class="icon-box bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-cash-stack fs-3"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-md-4 col-lg animate-fade-up delay-1">
-                    <div class="card stat-card shadow-sm p-3 h-100">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small fw-bold text-uppercase mb-1">Total Items</p>
-                                <h3 class="fw-bold mb-0 text-primary"><?php echo number_format($totalItems); ?></h3>
-                            </div>
-                            <div class="icon-box bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-box-seam fs-3"></i>
+                    <a href="inventory.php" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted small fw-bold text-uppercase mb-1 text-dark">Total Items</p>
+                                    <h3 class="fw-bold mb-0 text-primary"><?php echo number_format($totalItems); ?></h3>
+                                </div>
+                                <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-box-seam fs-3"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-md-4 col-lg animate-fade-up delay-2">
                     <a href="inventory.php?filter=low_stock" class="text-decoration-none">
@@ -146,30 +146,34 @@ $catTotalsResult = mysqli_query($conn, $catTotalsQuery);
                     </a>
                 </div>
                 <div class="col-md-6 col-lg animate-fade-up delay-3">
-                    <div class="card stat-card shadow-sm p-3 h-100">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small fw-bold text-uppercase mb-1">Issued Out</p>
-                                <h3 class="fw-bold mb-0 text-warning"><?php echo $issuedOut; ?></h3>
-                            </div>
-                            <div class="icon-box bg-warning bg-opacity-10 text-warning">
-                                <i class="bi bi-cart-dash fs-3"></i>
+                    <a href="stock_out.php" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted small fw-bold text-uppercase mb-1 text-dark">Issued Out</p>
+                                    <h3 class="fw-bold mb-0 text-warning"><?php echo $issuedOut; ?></h3>
+                                </div>
+                                <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-cart-dash fs-3"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-md-6 col-lg animate-fade-up delay-4">
-                    <div class="card stat-card shadow-sm p-3 h-100">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small fw-bold text-uppercase mb-1">Returns</p>
-                                <h3 class="fw-bold mb-0 text-info"><?php echo $returns; ?></h3>
-                            </div>
-                            <div class="icon-box bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-arrow-return-left fs-3"></i>
+                    <a href="returns.php" class="text-decoration-none">
+                        <div class="card stat-card shadow-sm p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted small fw-bold text-uppercase mb-1 text-dark">Returns</p>
+                                    <h3 class="fw-bold mb-0 text-info"><?php echo $returns; ?></h3>
+                                </div>
+                                <div class="icon-box bg-info bg-opacity-10 text-info">
+                                    <i class="bi bi-arrow-return-left fs-3"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
 
