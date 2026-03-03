@@ -62,7 +62,7 @@ $query = "SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categori
 $where_clauses = [];
 if (!empty($search)) { $where_clauses[] = "(p.name LIKE '%$search%' OR p.sku LIKE '%$search%' OR p.supplier LIKE '%$search%')"; }
 if (!empty($cat_filter)) { $where_clauses[] = "p.category_id = '$cat_filter'"; }
-if ($filter === 'low_stock') { $where_clauses[] = "p.quantity < 10"; } // Low stock filter logic
+if ($filter === 'low_stock') { $where_clauses[] = "p.quantity < 10"; } 
 
 if (count($where_clauses) > 0) { $query .= " WHERE " . implode(" AND ", $where_clauses); }
 $query .= " ORDER BY p.created_at DESC";
@@ -82,7 +82,9 @@ $preview_sku = "8M-" . date('Y') . "-" . str_pad($count_row['total'] + 1, 3, '0'
     <title>8th Mile IMS | Inventory</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <style>
         body { background-color: #f8f9fa; }
         .modal-content { border: none; border-radius: 12px; }
@@ -90,7 +92,6 @@ $preview_sku = "8M-" . date('Y') . "-" . str_pad($count_row['total'] + 1, 3, '0'
         .section-divider { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #002d72; border-bottom: 2px solid #eef2f7; padding-bottom: 5px; margin-bottom: 15px; }
         .input-group-text { background-color: #fdfdfd; }
         
-        /* Pushes the main content to the right so the sidebar doesn't cover it on desktop */
         #main-content { 
             transition: margin-left 0.3s; 
             width: 100%;
@@ -123,7 +124,9 @@ $preview_sku = "8M-" . date('Y') . "-" . str_pad($count_row['total'] + 1, 3, '0'
             <h3 class="fw-bold text-secondary">Inventory Management</h3>
             <div class="d-flex gap-2">
                 <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#importModal"><i class="bi bi-upload me-2"></i>Import CSV</button>
-                <button onclick="downloadPDF()" class="btn btn-danger shadow-sm text-white"><i class="bi bi-file-earmark-pdf me-2"></i>Export PDF</button>
+                
+                <button onclick="exportToExcel()" class="btn btn-success shadow-sm text-white"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</button>
+                
                 <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="bi bi-plus-lg me-2"></i>Add Product</button>
             </div>
         </div>
@@ -368,12 +371,24 @@ $preview_sku = "8M-" . date('Y') . "-" . str_pad($count_row['total'] + 1, 3, '0'
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        function downloadPDF() {
-            let table = document.getElementById("inventoryTable").cloneNode(true);
-            let rows = table.rows;
-            for (let i = 0; i < rows.length; i++) rows[i].deleteCell(-1); // Remove actions column
-            html2pdf().set({ margin: 0.4, filename: 'Inventory_Report.pdf', html2canvas: { scale: 2 }, jsPDF: { orientation: 'landscape' } }).from(table).save();
+        function exportToExcel() {
+            // Get the table element
+            let table = document.getElementById("inventoryTable");
+            
+            // Create a temporary clone to remove the "Actions" column
+            let tableClone = table.cloneNode(true);
+            let rows = tableClone.rows;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].deleteCell(-1); // Removes the last cell (Actions) from each row
+            }
+
+            // Convert HTML table to Worksheet
+            let wb = XLSX.utils.table_to_book(tableClone, {sheet: "Inventory Report"});
+            
+            // Generate and download the file
+            XLSX.writeFile(wb, "Inventory_Report.xlsx");
         }
     </script>
 </body>
