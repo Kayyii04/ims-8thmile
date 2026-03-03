@@ -48,11 +48,19 @@ while($o = mysqli_fetch_assoc($out_q)){
             margin-bottom: 20px;
         }
 
-        .watermark-logo {
-            display: none; 
-        }
+        /* REMOVED watermark styling to stop logo from showing in print */
         
         @media print {
+            /* Hides browser-generated Date, URL, and Page Titles */
+            @page {
+                margin: 0;
+                size: auto;
+            }
+
+            body {
+                padding: 1.5cm; /* Adds clean margin inside the printed sheet */
+            }
+
             #sidebar, .btn, .input-group, .form-select, .modal, .d-lg-none, .action-col {
                 display: none !important;
             }
@@ -71,16 +79,9 @@ while($o = mysqli_fetch_assoc($out_q)){
                 border: 1px solid #000 !important;
                 background: transparent !important; 
             }
-            .watermark-logo {
-                display: block !important;
-                position: fixed; 
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 400px;
-                opacity: 0.1;
-                z-index: -1;
-                pointer-events: none;
+            /* Explicitly ensure no images/watermarks appear on print */
+            img, .watermark-logo {
+                display: none !important;
             }
         }
     </style>
@@ -89,8 +90,6 @@ while($o = mysqli_fetch_assoc($out_q)){
     <?php include('sidebar.php'); ?>
     
     <main id="main-content" class="p-3 p-md-4">
-        <img src="8thmile_logo.png" class="watermark-logo" alt="Watermark Background">
-
         <button class="btn btn-primary d-lg-none mb-3 shadow-sm" onclick="toggleSidebar()"><i class="bi bi-list"></i> Menu</button>
         
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
@@ -178,16 +177,13 @@ while($o = mysqli_fetch_assoc($out_q)){
                 </div>
                 <form action="process_returns_logic.php" method="POST" id="processReturnForm">
                     <div class="modal-body p-4">
-                        
                         <div class="row mb-4">
                             <div class="col-md-5">
                                 <label class="small fw-bold text-uppercase text-muted">Return ID</label>
                                 <input type="text" name="return_id" class="form-control fw-bold" value="<?php echo $auto_return_id; ?>" readonly>
                             </div>
                         </div>
-
                         <label class="fw-bold mb-2">Items being Returned</label>
-                        
                         <div id="return-items-container">
                             <div class="row g-2 mb-3 return-item-row p-3 bg-light rounded border position-relative">
                                 <div class="col-md-7 position-relative">
@@ -215,12 +211,10 @@ while($o = mysqli_fetch_assoc($out_q)){
                                 </div>
                             </div>
                         </div>
-
                         <button type="button" class="btn btn-sm btn-outline-info mt-1" onclick="addReturnRow()">
                             <i class="bi bi-plus-circle me-1"></i> Add Another Item
                         </button>
                     </div>
-                    
                     <div class="modal-footer bg-light border-0">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" name="confirm_return" class="btn btn-info text-white px-4 shadow-sm">Confirm Return</button>
@@ -262,7 +256,6 @@ while($o = mysqli_fetch_assoc($out_q)){
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Existing Table Filtering Logic
         const searchInputBox = document.getElementById('returnSearch');
         const conditionFilter = document.getElementById('conditionFilter');
         const tableRows = document.querySelectorAll('#returnsTable tbody tr');
@@ -270,26 +263,18 @@ while($o = mysqli_fetch_assoc($out_q)){
         function applyFilters() {
             const searchTerm = searchInputBox.value.toLowerCase();
             const filterValue = conditionFilter.value.toLowerCase();
-
             tableRows.forEach(row => {
                 const conditionCell = row.querySelector('.condition-cell');
                 const conditionText = conditionCell ? conditionCell.textContent.toLowerCase().trim() : "";
                 const rowText = row.textContent.toLowerCase();
-
                 const matchesSearch = rowText.includes(searchTerm);
                 const matchesCondition = (filterValue === "") || (conditionText === filterValue);
-
                 row.style.display = (matchesSearch && matchesCondition) ? '' : 'none';
             });
         }
 
-        // Print Functions
         function printFilteredTable() {
-            const originalTitle = document.title;
-            const filterInfo = conditionFilter.value ? " - Condition: " + conditionFilter.value : "";
-            document.title = "8th Mile IMS Returns Report" + filterInfo;
             window.print();
-            document.title = originalTitle;
         }
         
         function printReturnSlip(returnId) {
@@ -304,8 +289,6 @@ while($o = mysqli_fetch_assoc($out_q)){
         searchInputBox.addEventListener('keyup', applyFilters);
         conditionFilter.addEventListener('change', applyFilters);
 
-        // --- Multi-Item Autocomplete Logic (Event Delegation) ---
-        
         function addReturnRow() {
             const template = document.getElementById('return-row-template');
             const clone = template.content.cloneNode(true);
@@ -313,8 +296,6 @@ while($o = mysqli_fetch_assoc($out_q)){
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            
-            // 1. Show dropdown on Focus
             document.addEventListener('focusin', function(e) {
                 if (e.target.classList.contains('issue-search-input')) {
                     const list = e.target.closest('.position-relative').querySelector('.issue-dropdown-list');
@@ -322,94 +303,47 @@ while($o = mysqli_fetch_assoc($out_q)){
                     filterOptions(e.target.value, list);
                 }
             });
-
-            // 2. Filter on Input/Typing
             document.addEventListener('input', function(e) {
                 if (e.target.classList.contains('issue-search-input')) {
                     const container = e.target.closest('.position-relative');
                     const list = container.querySelector('.issue-dropdown-list');
                     const hiddenId = container.querySelector('.hidden-stock-out-id');
-                    
-                    hiddenId.value = ''; // Clear hidden ID so user is forced to select from list
+                    hiddenId.value = ''; 
                     list.style.display = 'block';
                     filterOptions(e.target.value, list);
                 }
             });
-
-            // 3. Handle Clicks (Selection & Deletion)
             document.addEventListener('click', function(e) {
-                // User clicks a dropdown option
                 if (e.target.classList.contains('issue-option')) {
                     const list = e.target.closest('.issue-dropdown-list');
                     const container = list.closest('.position-relative');
                     const input = container.querySelector('.issue-search-input');
                     const hiddenId = container.querySelector('.hidden-stock-out-id');
-                    
                     input.value = e.target.textContent;
                     hiddenId.value = e.target.getAttribute('data-value');
                     list.style.display = 'none';
                 }
-                
-                // User clicks trash button
                 if (e.target.closest('.remove-item-btn')) {
                     const row = e.target.closest('.return-item-row');
                     const totalRows = document.querySelectorAll('.return-item-row').length;
-                    
-                    if(totalRows > 1) {
-                        row.remove();
-                    } else {
-                        alert('You must process at least one item per return.');
-                    }
+                    if(totalRows > 1) { row.remove(); } else { alert('You must process at least one item per return.'); }
                 }
-
-                // Close dropdowns if clicking outside
                 if (!e.target.classList.contains('issue-search-input') && !e.target.classList.contains('issue-option')) {
-                    document.querySelectorAll('.issue-dropdown-list').forEach(list => {
-                        list.style.display = 'none';
-                    });
+                    document.querySelectorAll('.issue-dropdown-list').forEach(list => { list.style.display = 'none'; });
                 }
             });
-
-            // 4. Form Submission Validation
-            document.getElementById('processReturnForm').addEventListener('submit', function(e) {
-                let isValid = true;
-                const hiddenInputs = document.querySelectorAll('.hidden-stock-out-id');
-                
-                hiddenInputs.forEach(input => {
-                    if (!input.value) {
-                        isValid = false;
-                        // Focus on the specific input that failed
-                        input.closest('.position-relative').querySelector('.issue-search-input').focus();
-                    }
-                });
-
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Please select valid items from the search dropdown lists before submitting.');
-                }
-            });
-
-            // Helper function to filter specific dropdown
             function filterOptions(query, listElement) {
                 query = query.toLowerCase().trim();
                 const options = listElement.querySelectorAll('.issue-option');
                 const noResultsMsg = listElement.querySelector('.no-results-msg');
                 let matchCount = 0;
-                
                 options.forEach(option => {
                     if (option.textContent.toLowerCase().includes(query)) {
                         option.style.display = 'block';
                         matchCount++;
-                    } else {
-                        option.style.display = 'none';
-                    }
+                    } else { option.style.display = 'none'; }
                 });
-
-                if (matchCount === 0) {
-                    noResultsMsg.style.display = 'block';
-                } else {
-                    noResultsMsg.style.display = 'none';
-                }
+                if (matchCount === 0) { noResultsMsg.style.display = 'block'; } else { noResultsMsg.style.display = 'none'; }
             }
         });
     </script>
