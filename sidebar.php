@@ -26,16 +26,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
         left: 0;
         top: 0;
         box-shadow: 10px 0 30px rgba(0,0,0,0.1);
-        overflow-y: auto; /* ADDED: Makes the sidebar scrollable */
+        overflow-y: auto; 
     }
 
-    /* ADDED: Mobile layout logic so the sidebar can be toggled in and out */
+    /* Mobile layout logic */
     @media (max-width: 991.98px) {
         #sidebar {
-            left: -280px; /* Hide by default on mobile */
+            left: -280px; 
         }
         #sidebar.show {
-            left: 0; /* Show when toggle is clicked */
+            left: 0; 
         }
     }
 
@@ -44,15 +44,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         padding: 40px 25px; 
         background: rgba(255, 255, 255, 0.05);
         border-bottom: 1px solid rgba(255,255,255,0.1);
-        position: relative; /* ADDED: Required to position the close button */
+        position: relative; 
     }
 
-    /* Adjusted Logo Styling - Removed white background */
     .brand-logo {
         width: 55px;
         height: 55px;
         object-fit: contain;
-        flex-shrink: 0; /* Prevents the logo from squeezing */
+        flex-shrink: 0; 
     }
 
     .nav-link {
@@ -81,7 +80,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         padding: 20px;
         border-top: 1px solid rgba(255,255,255,0.1);
         background: rgba(0,0,0,0.2);
-        margin-top: auto; /* Keeps logout at the bottom even when scrolling */
+        margin-top: auto; 
     }
 </style>
 
@@ -119,6 +118,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a href="clients.php" class="nav-link <?php echo ($current_page == 'clients.php') ? 'active' : ''; ?>">
             <i class="bi bi-people-fill"></i> Clients
         </a>
+
+        <a href="suppliers.php" class="nav-link <?php echo ($current_page == 'suppliers.php') ? 'active' : ''; ?>">
+            <i class="bi bi-truck"></i> Suppliers
+        </a>
+
+        <a href="employees.php" class="nav-link <?php echo ($current_page == 'employees.php') ? 'active' : ''; ?>">
+            <i class="bi bi-person-badge-fill"></i> Employees
+        </a>
     </div>
 
     <div class="logout-container">
@@ -149,7 +156,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
 </div>
 
 <script>
-    // ADDED: Simple script to toggle the sidebar in and out
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('show');
     }
