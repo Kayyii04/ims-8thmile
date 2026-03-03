@@ -2,20 +2,14 @@
 session_start();
 include('config.php');
 
-// Set Timezone
 date_default_timezone_set('Asia/Manila'); 
 
-// 1. Validation: Ensure ID exists in the URL
 if(!isset($_GET['transaction_id']) || empty($_GET['transaction_id'])) {
-    die("<div style='padding:20px; font-family:sans-serif; color:red;'>
-            <strong>Error:</strong> No Transaction ID provided. 
-            <br>Usage: print_slip.php?transaction_id=YOUR_ID
-         </div>");
+    die("<div style='padding:20px; font-family:sans-serif; color:red;'><strong>Error:</strong> No Transaction ID provided.</div>");
 }
 
 $trans_id = mysqli_real_escape_string($conn, $_GET['transaction_id']);
 
-// 2. Query execution
 $query = "SELECT s.*, p.name AS product_name, p.sku, c.client_name 
           FROM stock_out s 
           LEFT JOIN products p ON s.product_id = p.productID 
@@ -24,139 +18,123 @@ $query = "SELECT s.*, p.name AS product_name, p.sku, c.client_name
 
 $result = mysqli_query($conn, $query);
 
-// 3. Check for database errors or empty sets
-if (!$result) {
-    die("Database Error: " . mysqli_error($conn));
+if (!$result || mysqli_num_rows($result) == 0) {
+    die("<div style='padding:20px; font-family:sans-serif;'><strong>Error:</strong> Record not found.</div>");
 }
 
-if (mysqli_num_rows($result) == 0) {
-    die("<div style='padding:20px; font-family:sans-serif;'>
-            <strong>No Record Found:</strong> The Transaction ID '$trans_id' does not exist in the database.
-         </div>");
-}
-
-// 4. Prepare data for display
 $first_row = mysqli_fetch_assoc($result);
-mysqli_data_seek($result, 0); // Reset pointer so the while loop can show all items
+mysqli_data_seek($result, 0); 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Slip - <?php echo htmlspecialchars($trans_id); ?></title>
+    <title>Accountability Slip</title>
     <style>
-        /* Minimized layout for 8th Mile Inventory System */
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 10px; color: #333; line-height: 1.3; }
+        @page { margin: 0; size: auto; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 40px; color: #000; background-color: #fff; }
+        .slip-container { max-width: 850px; margin: auto; }
         
-        /* UPDATED: Added position relative, z-index, and overflow so the watermark stays inside and behind text */
-        .slip-box { border: 1px solid #ccc; padding: 15px 25px; max-width: 800px; margin: auto; background: #fff; position: relative; z-index: 1; overflow: hidden; }
+        .header-wrapper { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-container { margin-right: 20px; }
+        .logo-container img { max-width: 100px; height: auto; display: block; }
+        .company-info { text-align: center; }
+        .company-name { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0; }
+        .company-address { font-size: 13px; margin-top: 3px; }
+
+        .title-box { text-align: center; font-weight: bold; font-size: 18px; text-decoration: underline; text-transform: uppercase; margin-top: 5px; display: block; }
+
+        .info-section { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; line-height: 1.4; }
+        .info-column { width: 48%; }
+        .info-column.right { text-align: right; }
+        .label { font-weight: bold; text-transform: uppercase; }
+
+        /* Table maintained at same size with larger font */
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        table, th, td { border: 1.5px solid black; }
         
-        /* ADDED: Styling for the transparent watermark logo */
-        .watermark-logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 350px;
-            opacity: 0.1; /* Makes it look transparent/faded */
-            z-index: -1; /* Places it behind the text */
-            pointer-events: none; /* Prevents it from interfering with text selection */
+        th { 
+            padding: 3px 5px; 
+            font-size: 18px; /* Slightly bigger headers */
+            background: #f2f2f2; 
+            text-transform: uppercase; 
+        }
+        
+        td { 
+            padding: 2px 5px; /* Minimal padding to allow larger font without growing table */
+            font-size: 18px; /* Increased font size as requested */
+            vertical-align: middle; 
         }
 
-        .header { text-align: center; border-bottom: 2px solid #002d72; padding-bottom: 8px; margin-bottom: 12px; }
-        .logo { font-size: 20px; font-weight: bold; color: #002d72; text-transform: uppercase; }
-        .title { font-size: 14px; margin-top: 2px; font-weight: 600; letter-spacing: 1px; }
-        
-        .info-grid { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .info-col { width: 48%; }
-        .label { font-weight: bold; font-size: 10px; color: #666; text-transform: uppercase; }
-        .value-text { color: #000; font-size: 13px; font-weight: 500; }
+        .text-center { text-align: center; }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th { background: #f4f6f8; text-align: left; padding: 6px 8px; font-size: 11px; border: 1px solid #ddd; }
-        td { padding: 4px 8px; border: 1px solid #eee; font-size: 12px; }
-        
-        .terms { font-size: 10px; color: #666; font-style: italic; margin-bottom: 20px; }
-        .footer { margin-top: 30px; display: flex; justify-content: space-between; text-align: center; }
-        .sig-box { width: 30%; border-top: 1px solid #333; padding-top: 5px; font-size: 11px; }
-        
-        /* Forces the browser to remove default headers (Date, Title, URL, Page Number) */
-        @page {
-            margin: 0;
-        }
+        .footer-sigs { margin-top: 40px; display: flex; justify-content: space-between; }
+        .sig-line { width: 28%; border-top: 1.5px solid #000; text-align: center; padding-top: 5px; font-size: 12px; }
 
-        @media print {
-            body { 
-                margin: 1.5cm; /* Adds a clean margin back inside the printed page */
-                padding: 0; 
-            }
-            .slip-box { 
-                border: none; 
-                margin: 0;
-                padding: 0;
-            }
-            .no-print { display: none; }
+        @media print { 
+            .no-print { display: none; } 
+            body { padding: 40px; }
         }
     </style>
 </head>
 <body>
-    <div style="text-align:center; margin-bottom: 10px;" class="no-print">
-        <button onclick="window.print()" style="padding: 5px 15px; cursor: pointer;">Print This Slip</button>
+
+    <div class="no-print" style="text-align:center; margin-bottom: 20px;">
+        <button onclick="window.print()" style="padding: 10px 24px; cursor: pointer; font-weight: bold;">PRINT SLIP</button>
     </div>
 
-    <div class="slip-box">
-        <img src="8thmile_logo.png" class="watermark-logo" alt="Watermark Background">
-
-        <div class="header">
-            <div class="logo">8th Mile Staffing & General Services</div>
-            <div class="title">ACCOUNTABILITY SLIP</div>
+    <div class="slip-container">
+        <div class="header-wrapper">
+            <div class="logo-container">
+                <img src="8thmile_logo.png" alt="8th Mile Logo">
+            </div>
+            <div class="company-info">
+                <div class="company-name">8thmile Staffing and General Services INC.</div>
+                <div class="company-address">Brgy. Macabling, Estrilla Bussines Center Santa Rosa</div>
+                <div class="title-box">ACCOUNTABILITY SLIP</div>
+            </div>
         </div>
 
-        <div class="info-grid">
-            <div class="info-col">
-                <div class="label">Ref: <span class="value-text"><?php echo htmlspecialchars($trans_id); ?></span></div>
-                <div class="label">Date: <span class="value-text"><?php echo date('M d, Y', strtotime($first_row['date_out'])); ?></span></div>
+        <div class="info-section">
+            <div class="info-column">
+                <div><span class="label">Ref:</span> <?php echo htmlspecialchars($trans_id); ?></div>
+                <div><span class="label">Date:</span> <?php echo date('M d, Y', strtotime($first_row['date_out'])); ?></div>
             </div>
-            <div class="info-col" style="text-align: right;">
-                <div class="label">Holder: <span class="value-text"><?php echo htmlspecialchars($first_row['holder_name']); ?></span></div>
-                <div class="label">Site: <span class="value-text"><?php echo htmlspecialchars($first_row['client_name']); ?></span></div>
-                <div class="label">Project: <span class="value-text"><?php echo htmlspecialchars($first_row['project_name'] ?? 'N/A'); ?></span></div>
+            <div class="info-column right">
+                <div><span class="label">Holder:</span> <?php echo htmlspecialchars($first_row['holder_name']); ?></div>
+                <div><span class="label">Site:</span> <?php echo htmlspecialchars($first_row['client_name']); ?></div>
+                <div><span class="label">Project:</span> <?php echo htmlspecialchars($first_row['project_name'] ?? 'N/A'); ?></div>
             </div>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th width="15%">SKU</th>
-                    <th width="70%">Item Description</th>
-                    <th width="15%" style="text-align: center;">Qty</th>
+                    <th width="8%">NO.</th> 
+                    <th width="10%">QTY</th>
+                    <th width="12%">UNIT</th>
+                    <th>DESCRIPTIONS</th>
                 </tr>
             </thead>
             <tbody>
-                <?php while($row = mysqli_fetch_assoc($result)): ?>
+                <?php 
+                $item_no = 1; 
+                while($row = mysqli_fetch_assoc($result)): 
+                ?>
                 <tr>
-                    <td style="color: #555;"><?php echo htmlspecialchars($row['sku'] ?? 'N/A'); ?></td>
-                    <td><strong><?php echo htmlspecialchars($row['product_name'] ?? 'Unknown Item'); ?></strong></td>
-                    <td style="text-align: center; font-weight: bold;"><?php echo $row['quantity']; ?></td>
+                    <td class="text-center"><?php echo $item_no++; ?></td> 
+                    <td class="text-center"><?php echo $row['quantity']; ?></td>
+                    <td class="text-center"><?php echo htmlspecialchars($row['unit'] ?? '-'); ?></td>
+                    <td class="text-center"><?php echo htmlspecialchars($row['product_name']); ?></td>
                 </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
 
-        <p class="terms">
-            * I hereby acknowledge receipt of the items listed above in good condition and accept full responsibility for their proper use and maintenance.
-        </p>
-
-        <div class="footer">
-            <div class="sig-box">
-                <strong><?php echo htmlspecialchars($first_row['holder_name']); ?></strong><br>Receiver / Holder
-            </div>
-            <div class="sig-box">
-                <strong>Authorized Personnel</strong><br>Issuer
-            </div>
-            <div class="sig-box">
-                <strong>Security Officer</strong><br>Gate Pass Check
-            </div>
+        <div class="footer-sigs">
+            <div class="sig-line">Receiver / Holder</div>
+            <div class="sig-line">Authorized Issuer</div>
+            <div class="sig-line">Security Officer</div>
         </div>
     </div>
 </body>
