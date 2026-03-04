@@ -11,19 +11,26 @@ $auto_trans_id = "OUT-" . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 5))
 
 /**
  * UPDATED QUERY: 
- * We now include the individual record 'id' in the GROUP_CONCAT.
- * This allows us to create a unique delete link for every specific item.
+ * We now include the individual record 'id' and 'holder_name' in the GROUP_CONCAT.
+ * The Add (+) button is now placed inside a vertical flex container below the Remove (-) button.
  */
 $query = "SELECT s.*, c.client_name, 
           GROUP_CONCAT(
             CONCAT(
-                '<div class=\"d-flex justify-content-between align-items-center mb-1\">',
+                '<div class=\"d-flex justify-content-between align-items-center mb-2 border-bottom pb-1\">',
                 '<span>• ', p.name, ' (', s.quantity, ' ', s.unit, ')</span>',
-                '<a href=\"delete_single_item.php?id=', s.id, '&trans_id=', s.transaction_id, '\" 
-                   class=\"btn btn-link text-danger p-0 ms-2\" 
-                   onclick=\"return confirm(\'Remove this specific item from the record and return to stock?\')\">
-                   <i class=\"bi bi-dash-circle\"></i>
-                </a>',
+                '<div class=\"d-flex flex-column align-items-center ms-2\">',
+                    '<a href=\"delete_single_item.php?id=', s.id, '&trans_id=', s.transaction_id, '\" 
+                       class=\"btn btn-link text-danger p-0 mb-1\" 
+                       onclick=\"return confirm(\'Remove this specific item?\')\" title=\"Remove Item\">
+                       <i class=\"bi bi-dash-circle\"></i>
+                    </a>',
+                    '<button class=\"btn btn-link text-success p-0\" 
+                       onclick=\"prepareAddItem(\'', s.transaction_id, '\', \'', s.ClientID, '\', \'', REPLACE(s.holder_name, \"'\", \"\\'\"), '\', \'', IFNULL(REPLACE(s.project_name, \"'\", \"\\'\"), ''), '\')\" 
+                       title=\"Add item to this transaction\">
+                       <i class=\"bi bi-plus-circle\"></i>
+                    </button>',
+                '</div>',
                 '</div>'
             ) SEPARATOR ''
           ) as item_list,
@@ -70,9 +77,8 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' class='bi bi-search' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") !important;
             background-repeat: no-repeat !important; background-position: right 0.75rem center !important; padding-right: 2.5rem !important;
         }
-        /* Style for the inline (-) dash button */
         .btn-link i { font-size: 1.1rem; vertical-align: middle; }
-        .btn-link:hover { opacity: 0.7; }
+        .btn-link:hover { opacity: 0.7; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -81,7 +87,7 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
     <main id="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold text-secondary">Stock Issuance</h3>
-            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#stockOutModal">
+            <button class="btn btn-primary shadow-sm" onclick="openNewIssuance()">
                 <i class="bi bi-cart-plus me-2"></i>Issue Items
             </button>
         </div>
@@ -134,20 +140,20 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>Issue Items</h5>
+                    <h5 class="modal-title" id="modalTitle"><i class="bi bi-box-seam me-2"></i>Issue Items</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="process_stockout.php" method="POST">
+                <form id="stockOutForm" action="process_stockout.php" method="POST">
                     <div class="modal-body p-4">
                         <div class="row g-3 mb-4 p-3 bg-light rounded">
                             <div class="col-md-4">
                                 <label class="small fw-bold text-uppercase text-muted">Transaction ID</label>
-                                <input type="text" name="transaction_id" class="form-control fw-bold" value="<?php echo $auto_trans_id; ?>" readonly>
+                                <input type="text" name="transaction_id" id="modal_trans_id" class="form-control fw-bold" value="<?php echo $auto_trans_id; ?>" readonly>
                             </div>
                             <div class="col-md-8">
                                 <label class="small fw-bold text-uppercase text-muted">Client / Site Search</label>
                                 <div class="input-group search-bar-style">
-                                    <select name="client_id" class="form-select searchable-select" required>
+                                    <select name="client_id" id="modal_client_id" class="form-select searchable-select" required>
                                         <option value=""></option> 
                                         <?php 
                                         $clients = mysqli_query($conn, "SELECT * FROM clients");
@@ -159,7 +165,7 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
                             <div class="col-md-6">
                                 <label class="small fw-bold text-uppercase text-muted">Receiver Name</label>
                                 <div class="input-group search-bar-style">
-                                    <select name="holder_name" class="form-select searchable-select" required>
+                                    <select name="holder_name" id="modal_holder_name" class="form-select searchable-select" required>
                                         <option value=""></option>
                                         <?php foreach($employees as $emp): ?>
                                             <option value="<?php echo htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']); ?>">
@@ -171,7 +177,7 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
                             </div>
                             <div class="col-md-6">
                                 <label class="small fw-bold text-uppercase text-muted">Project Name</label>
-                                <input type="text" name="project_name" class="form-control" placeholder="Project Title" required>
+                                <input type="text" name="project_name" id="modal_project_name" class="form-control" placeholder="Project Title" required>
                             </div>
                         </div>
 
@@ -197,7 +203,7 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
                     </div>
                     <div class="modal-footer bg-light border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" name="save_stockout" class="btn btn-primary px-4">Confirm Issuance</button>
+                        <button type="submit" name="save_stockout" id="submitBtn" class="btn btn-primary px-4">Confirm Issuance</button>
                     </div>
                 </form>
             </div>
@@ -210,10 +216,42 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const originalTransId = "<?php echo $auto_trans_id; ?>";
+
         function initSelect2(selector = '.searchable-select') {
-            $(selector).select2({ theme: 'bootstrap-5', width: '100%', placeholder: 'Type to search...', allowClear: true, dropdownParent: $('#stockOutModal') });
+            $(selector).select2({ 
+                theme: 'bootstrap-5', 
+                width: '100%', 
+                placeholder: 'Type to search...', 
+                allowClear: true, 
+                dropdownParent: $('#stockOutModal') 
+            });
         }
-        $(document).ready(function() { initSelect2(); });
+
+        $(document).ready(function() { 
+            initSelect2(); 
+        });
+
+        function openNewIssuance() {
+            $('#modalTitle').html('<i class="bi bi-box-seam me-2"></i>Issue Items');
+            $('#modal_trans_id').val(originalTransId);
+            $('#modal_client_id').val('').trigger('change');
+            $('#modal_holder_name').val('').trigger('change');
+            $('#modal_project_name').val('');
+            $('#submitBtn').text('Confirm Issuance');
+            $('#stockOutModal').modal('show');
+        }
+
+        function prepareAddItem(transId, clientId, holder, project) {
+            $('#modalTitle').html('<i class="bi bi-plus-circle-fill me-2"></i>Add Item to ' + transId);
+            $('#modal_trans_id').val(transId);
+            $('#modal_client_id').val(clientId).trigger('change');
+            $('#modal_holder_name').val(holder).trigger('change');
+            $('#modal_project_name').val(project);
+            $('#submitBtn').text('Add to Transaction');
+            $('#stockOutModal').modal('show');
+        }
+
         function printSlip(transId) {
             var iframe = document.getElementById('print_frame');
             iframe.src = 'print_slip.php?transaction_id=' + transId;
@@ -222,6 +260,7 @@ while ($emp = mysqli_fetch_assoc($emp_query)) {
                 iframe.contentWindow.print();
             };
         }
+
         function addItemRow() {
             const container = document.getElementById('items-container');
             const row = document.createElement('div');
