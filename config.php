@@ -1,9 +1,9 @@
 <?php
-// Database configuration for InfinityFree
-$host = "sql308.infinityfree.com"; // Get this from your 'MySQL Hostname'
-$db_user = "if0_41224072";        // Get this from your 'MySQL Username'
-$db_pass = "8thmileims"; // The password you use to log in to InfinityFree
-$db_name = "if0_41224072_8th_mile_db"; // The full database name you created in the panel
+// Update these with your InfinityFree MySQL details
+$host = "sql308.infinityfree.com"; // Your MySQL Hostname
+$db_user = "if0_41224072";           // Your MySQL Username
+$db_pass = "8thmileims";  // Your Account Password
+$db_name = "if0_41224072_8th_mile_db";  // Your MySQL Database Name
 
 $conn = mysqli_connect($host, $db_user, $db_pass, $db_name);
 
