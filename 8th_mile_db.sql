@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 03, 2026 at 02:30 AM
+-- Generation Time: Mar 04, 2026 at 03:42 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -224,7 +224,7 @@ CREATE TABLE `stock_out` (
 --
 
 INSERT INTO `stock_out` (`id`, `transaction_id`, `product_id`, `holder_name`, `holder_id_number`, `project_name`, `quantity`, `unit`, `date_out`, `ClientID`) VALUES
-(95, 'OUT-8A5B3', 8, 'Samuel Base', '', 'Renovation', 1, 'Set', '2026-03-03 01:24:17', 3);
+(97, 'OUT-8A5B3', 8, 'Samuel Base', '', 'Renovation', 1, 'Set', '2026-03-03 08:40:14', 3);
 
 -- --------------------------------------------------------
 
@@ -356,7 +356,7 @@ ALTER TABLE `returns`
 -- AUTO_INCREMENT for table `stock_out`
 --
 ALTER TABLE `stock_out`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
