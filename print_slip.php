@@ -90,7 +90,7 @@ mysqli_data_seek($result, 0);
             </div>
             <div class="company-info">
                 <div class="company-name">8thmile Staffing and General Services INC.</div>
-                <div class="company-address">Brgy. Macabling, Estrilla Bussines Center Santa Rosa</div>
+                <div class="company-address">2nd Floor Estrella Commercial Center, National Hi-way Brgy. Macabling Sta. Rosa, Laguna</div>
                 <div class="title-box">ACCOUNTABILITY SLIP</div>
             </div>
         </div>
